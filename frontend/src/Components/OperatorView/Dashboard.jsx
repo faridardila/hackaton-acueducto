@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BellIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 
 /**
  * Tarjeta de estadística
@@ -28,23 +28,16 @@ function Dashboard() {
         <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
             {/* Main grid */}
             <main className="mx-auto max-w-7xl">
-                {/* Stat cards */}
-                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                    <StatCard title="Usuarios activos" value="1,248" icon={UserGroupIcon} />
-                    <StatCard title="Tickets abiertos" value="24" icon={ChartBarIcon} />
-                    <StatCard title="Tiempo promedio" value="2h 14m" icon={ChartBarIcon} />
-                    <StatCard title="SLA cumplimiento" value="98%" icon={UserGroupIcon} />
-                </section>
 
                 {/* Content area: gráfico + tabla */}
-                <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <div className="lg:col-span-2 rounded-lg bg-white p-4 shadow-sm border">
                         <h2 className="text-sm font-medium text-gray-700">Actividad reciente</h2>
                         <div className="mt-4 h-56 rounded-md bg-gray-50 flex items-center justify-center text-gray-500">Gráfico (placeholder)</div>
                         <p className="mt-2 text-xs text-gray-500">Aquí puede ir un gráfico real (Chart.js, Recharts, etc.)</p>
                     </div>
 
-                    <div className="rounded-lg bg-white p-4 shadow-sm border">
+                    <div className="rounded-lg bg-white  p-4 shadow-sm border">
                         <h2 className="text-sm font-medium text-gray-700">Resumen rápido</h2>
                         <ul className="mt-3 space-y-2 text-sm text-gray-700">
                             <li className="flex justify-between"><span>Incidencias hoy</span><span className="font-semibold">8</span></li>
@@ -53,6 +46,18 @@ function Dashboard() {
                         </ul>
                     </div>
                 </section>
+                
+                {/* Stat cards */}
+                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                    <StatCard title="Usuarios activos" value="1,248" icon={UserGroupIcon} />
+                    <StatCard title="Tickets abiertos" value="24" icon={ChartBarIcon} />
+                    <StatCard title="Tiempo promedio" value="2h 14m" icon={ChartBarIcon} />
+                    <StatCard title="SLA cumplimiento" value="98%" icon={UserGroupIcon} />
+                    <StatCard title="CristoRey" value="100%" icon={UserPlusIcon} />
+
+                </section>
+
+                
 
                 {/* Tabla de ejemplo */}
                 <section className="mt-6 rounded-lg bg-white p-4 shadow-sm border">

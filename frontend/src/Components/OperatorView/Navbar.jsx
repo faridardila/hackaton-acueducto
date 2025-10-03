@@ -3,9 +3,9 @@ import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline'
 function Navbar() {
   // Componente puramente presentacional: vista estática (sin lógica)
   return (
-    <nav className="relative bg-blue-400 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10">
+    <nav className="relative bg-blue-500 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center justify-between">
+        <div className="relative flex h-24 items-center justify-between">
           <div className="flex items-center">
             {/* Botón móvil (vista) */}
             <button className="sm:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white">
