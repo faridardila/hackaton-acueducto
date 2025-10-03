@@ -1,10 +1,12 @@
-import './App.css'
+import Navbar from './Components/OperatorView/Navbar.jsx';
+import Dashboard from './Components/OperatorView/Dashboard.jsx';
 
 function App() {
 
   return (
     <>
-      <h1>Hola, este es el componente principal del proyecto :3</h1>
+    <Navbar />
+    <Dashboard />
     </>
   )
 }
