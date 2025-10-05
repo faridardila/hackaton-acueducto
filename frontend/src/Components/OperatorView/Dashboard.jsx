@@ -1,6 +1,9 @@
 // @ts-nocheck
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import Statistics from './Statistics.jsx'
+import Formularios from './Formularios.jsx'
+import Forms from './Forms.jsx'
 
 /**
  * Tarjeta de estadística
@@ -9,7 +12,7 @@ import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/
 function StatCard(props) {
     const { title, value, icon: Icon, bg = 'bg-white' } = props
     return (
-        <div className={`rounded-lg p-4 ${bg} shadow-sm border`}> 
+        <div className={`rounded-lg p-4 ${bg} shadow-sm border`}>
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm text-gray-500">{title}</p>
@@ -24,20 +27,23 @@ function StatCard(props) {
 }
 
 function Dashboard() {
-    // Vista estática de una dashboard para la vista de operador (tema claro, sin navbar)
-
     const mapRef = useRef(null)
     const [hovered, setHovered] = useState(null)
     const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
     const [selected, setSelected] = useState(null)
+    const [helpOpen, setHelpOpen] = useState(false)
+        const [route, setRoute] = useState(window.location.hash || '#inicio')
 
-    // Sample data: 15 polygon 'houses' with mock info and svg points (viewBox 0 0 1000 600)
-    // Neighborhood boundary (single polygon) and houses inside it.
+        useEffect(() => {
+            function onHash() { setRoute(window.location.hash || '#inicio') }
+            window.addEventListener('hashchange', onHash)
+            return () => window.removeEventListener('hashchange', onHash)
+        }, [])
+
     const boundary = {
         points: '40,60 960,40 980,160 920,540 120,560 40,420'
     }
 
-    // Make houses 1..22 trapezoids similar to refs and filled
     const houses = [
         { id: 1, address: 'Calle 1 #10-01', owner: 'Luis Gómez', families: 3, points: '120,100 185,100 170,170 115,170' },
         { id: 2, address: 'Calle 2 #11-02', owner: 'María López', families: 4, points: '200,100 265,100 250,170 195,170' },
@@ -73,7 +79,6 @@ function Dashboard() {
     function handleMouseMove(e, house) {
         const mapRect = mapRef.current?.getBoundingClientRect()
         if (!mapRect) return
-        // Position tooltip above cursor, clamped inside container
         const x = Math.min(Math.max(e.clientX - mapRect.left, 20), mapRect.width - 20)
         const y = Math.max(e.clientY - mapRect.top - 10, 10)
         setHoverPos({ x, y })
@@ -90,151 +95,102 @@ function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
-            {/* Main grid */}
-            <main className="mx-auto max-w-7xl">
+                    <main className="mx-auto max-w-7xl">
+                                {route === '#estadisticas' ? (
+                                    <Statistics />
+                                        ) : route === '#formularios' ? (
+                                            <Forms />
+                                ) : (
+                            // default: interactive map
+                            <section className="mt-6 rounded-lg bg-white p-4 shadow-sm border">
+                                <div className="flex gap-6">
+                                    <aside className="w-80 rounded border p-4 bg-gray-50 shadow-sm">
+                                        <h3 className="text-sm font-semibold">Panel de detalles</h3>
+                                        {!selected ? (
+                                            <p className="mt-3 text-sm text-gray-600">Haga clic en una casa del mapa para ver la información completa.</p>
+                                        ) : (
+                                            <div className="mt-3 text-sm text-gray-800 space-y-2">
+                                                <p><strong>Dirección:</strong> {selected.address}</p>
+                                                <p><strong>Propietario:</strong> {selected.owner}</p>
+                                                <p><strong>Número de familias:</strong> {selected.families}</p>
+                                                <p><strong>ID:</strong> {selected.id}</p>
+                                                <button onClick={() => setSelected(null)} className="mt-2 inline-block px-3 py-1 text-sm bg-indigo-600 text-white rounded">Cerrar</button>
+                                            </div>
+                                        )}
+                                    </aside>
 
-                {/* Content area: gráfico + tabla */}
-                <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2 rounded-lg bg-white p-4 shadow-sm border">
-                        <h2 className="text-sm font-medium text-gray-700">Actividad reciente</h2>
-                        <div className="mt-4 h-56 rounded-md bg-gray-50 flex items-center justify-center text-gray-500">Gráfico (placeholder)</div>
-                        <p className="mt-2 text-xs text-gray-500">Aquí puede ir un gráfico real (Chart.js, Recharts, etc.)</p>
-                    </div>
+                                    <div ref={mapRef} className="relative flex-1 rounded border overflow-hidden bg-white" style={{ minHeight: 520 }}>
+                                        <svg viewBox="0 0 1000 600" className="w-full h-full block">
+                                            <rect x="0" y="0" width="1000" height="600" fill="#f8fafc" />
+                                            <polygon points={boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
 
-                    <div className="rounded-lg bg-white  p-4 shadow-sm border">
-                        <h2 className="text-sm font-medium text-gray-700">Resumen rápido</h2>
-                        <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                            <li className="flex justify-between"><span>Incidencias hoy</span><span className="font-semibold">8</span></li>
-                            <li className="flex justify-between"><span>Operadores online</span><span className="font-semibold">5</span></li>
-                            <li className="flex justify-between"><span>Promedio respuesta</span><span className="font-semibold">12m</span></li>
-                        </ul>
-                    </div>
-                </section>
-                
-                {/* Stat cards */}
-                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                    <StatCard title="Usuarios activos" value="1,248" icon={UserGroupIcon} />
-                    <StatCard title="Tickets abiertos" value="24" icon={ChartBarIcon} />
-                    <StatCard title="Tiempo promedio" value="2h 14m" icon={ChartBarIcon} />
-                    <StatCard title="SLA cumplimiento" value="98%" icon={UserGroupIcon} />
-                    <StatCard title="CristoRey" value="100%" icon={UserPlusIcon} />
-
-                </section>
-
-                
-
-                {/* Interactive map area + detail panel */}
-                <section className="mt-6 rounded-lg bg-white p-4 shadow-sm border">
-                    <h2 className="text-sm font-medium text-gray-700 mb-3">Visualización de zonas</h2>
-                    <div className="flex gap-6">
-                        {/* Left panel: details when polygon clicked */}
-                        <aside className="w-80 rounded border p-4 bg-gray-50 shadow-sm">
-                            <h3 className="text-sm font-semibold">Panel de detalles</h3>
-                            {!selected ? (
-                                <p className="mt-3 text-sm text-gray-600">Haga clic en una casa del mapa para ver la información completa.</p>
-                            ) : (
-                                <div className="mt-3 text-sm text-gray-800 space-y-2">
-                                    <p><strong>Dirección:</strong> {selected.address}</p>
-                                    <p><strong>Propietario:</strong> {selected.owner}</p>
-                                    <p><strong>Número de familias:</strong> {selected.families}</p>
-                                    <p><strong>ID:</strong> {selected.id}</p>
-                                    <button onClick={() => setSelected(null)} className="mt-2 inline-block px-3 py-1 text-sm bg-indigo-600 text-white rounded">Cerrar</button>
-                                </div>
-                            )}
-                        </aside>
-
-                        {/* Map area */}
-                        <div ref={mapRef} className="relative flex-1 rounded border overflow-hidden bg-white" style={{ minHeight: 420 }}>
-                            {/* Top-floating label removed as requested */}
-
-                            {/* SVG map (polygons) */}
-                            <svg viewBox="0 0 1000 600" className="w-full h-full block">
-                                {/* background */}
-                                <rect x="0" y="0" width="1000" height="600" fill="#f8fafc" />
-
-                                {/* neighborhood boundary (green stroke). Now with a subtle fill so a background image can be seen through it. */}
-                                {/* To add a satellite/background image: insert an <image href="/path/to/image.jpg" x="0" y="0" width="1000" height="600" preserveAspectRatio="xMidYMid slice" /> above this polygon. */}
-                                <polygon points={boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
-
-                                {houses.map((h) => {
-                                    const isHovered = hovered?.id === h.id
-                                    const isSelected = selected?.id === h.id
-                                    return (
-                                        <g key={h.id}>
-                                            <polygon
-                                                points={h.points}
-                                                // filled polygons: default white fill, subtle stroke. Hover/selected use solid green fills.
-                                                className={`cursor-pointer transition-all ${isSelected ? 'fill-emerald-400 stroke-emerald-700 stroke-2' : isHovered ? 'fill-emerald-300 stroke-emerald-600 stroke-1' : 'fill-white stroke-rose-300 stroke-1'}`}
-                                                onMouseMove={(e) => handleMouseMove(e, h)}
-                                                onMouseEnter={(e) => handleMouseMove(e, h)}
-                                                onMouseLeave={handleMouseLeave}
-                                                onClick={() => handleClick(h)}
-                                            />
-                                        </g>
-                                    )
-                                })}
-                            </svg>
-
-                            {/* Floating tooltip shown on hover (top positioned) */}
-                            {hovered ? (
-                                <div
-                                    className="pointer-events-none absolute z-30 max-w-xs w-72 bg-white border shadow-lg rounded-lg text-sm text-gray-800"
-                                    style={{ left: hoverPos.x, top: Math.max(hoverPos.y - 120, 8), transform: 'translateX(-50%)' }}
-                                >
-                                    <div className="p-3">
-                                        <div className="text-xs text-gray-500">{hovered.address}</div>
-                                        <div className="mt-1 font-semibold">{hovered.owner}</div>
-                                        <div className="mt-1 text-gray-600">Número de familias: {hovered.families}</div>
-                                    </div>
-                                    {/* tail */}
-                                    <div style={{ position: 'absolute', left: '50%', bottom: -8, transform: 'translateX(-50%)' }}>
-                                        <svg width="20" height="8" viewBox="0 0 20 8">
-                                            <path d="M0 0 L10 8 L20 0" fill="#ffffff" stroke="#e5e7eb" />
+                                            {houses.map((h) => {
+                                                const isHovered = hovered?.id === h.id
+                                                const isSelected = selected?.id === h.id
+                                                return (
+                                                    <g key={h.id}>
+                                                        <polygon
+                                                            points={h.points}
+                                                            className={`cursor-pointer transition-all ${isSelected ? 'fill-emerald-400 stroke-emerald-700 stroke-2' : isHovered ? 'fill-emerald-300 stroke-emerald-600 stroke-1' : 'fill-white stroke-rose-300 stroke-1'}`}
+                                                            onMouseMove={(e) => handleMouseMove(e, h)}
+                                                            onMouseEnter={(e) => handleMouseMove(e, h)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                            onClick={() => handleClick(h)}
+                                                        />
+                                                    </g>
+                                                )
+                                            })}
                                         </svg>
+
+                                        {hovered ? (
+                                            <div
+                                                className="pointer-events-none absolute z-30 max-w-xs w-72 bg-white border shadow-lg rounded-lg text-sm text-gray-800"
+                                                style={{ left: hoverPos.x, top: Math.max(hoverPos.y - 120, 8), transform: 'translateX(-50%)' }}
+                                            >
+                                                <div className="p-3">
+                                                    <div className="text-xs text-gray-500">{hovered.address}</div>
+                                                    <div className="mt-1 font-semibold">{hovered.owner}</div>
+                                                    <div className="mt-1 text-gray-600">Número de familias: {hovered.families}</div>
+                                                </div>
+                                                <div style={{ position: 'absolute', left: '50%', bottom: -8, transform: 'translateX(-50%)' }}>
+                                                    <svg width="20" height="8" viewBox="0 0 20 8">
+                                                        <path d="M0 0 L10 8 L20 0" fill="#ffffff" stroke="#e5e7eb" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
-                            ) : null}
+                            </section>
+                        )}
+                    </main>
+
+            {/* Floating help button (bottom-left) and manual popup */}
+            <div>
+                <button
+                    onClick={() => setHelpOpen(true)}
+                    aria-label="Ayuda"
+                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+                >
+                    <span className="text-lg font-bold">?</span>
+                </button>
+
+                {helpOpen ? (
+                    <div className="fixed left-6 bottom-20 z-50 w-80 rounded-lg bg-white shadow-xl border">
+                        <div className="flex items-center justify-between border-b px-4 py-2">
+                            <strong className="text-sm">Manual de uso</strong>
+                            <button onClick={() => setHelpOpen(false)} className="text-gray-500 hover:text-gray-700">Cerrar</button>
+                        </div>
+                        <div className="p-3 text-sm text-gray-700 space-y-2 max-h-72 overflow-auto">
+                            <p><strong>1.</strong> Sobre el mapa, pase el cursor sobre una casa para ver información rápida.</p>
+                            <p><strong>2.</strong> Haga click en una casa para abrir el panel izquierdo con la información completa.</p>
+                            <p><strong>3.</strong> Use el panel izquierdo para ver/editar información (prototipo).</p>
+                            <p><strong>4.</strong> Este es un prototipo: los datos son de prueba. Para mapas reales se integrará Leaflet/GeoJSON.</p>
+                            <p><strong>Contacto:</strong> Equipo de desarrollo - soporte@example.com</p>
                         </div>
                     </div>
-                </section>
-
-                {/* Tabla de ejemplo */}
-                <section className="mt-6 rounded-lg bg-white p-4 shadow-sm border">
-                    <h2 className="text-sm font-medium text-gray-700 mb-3">Últimas órdenes</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-left text-sm">
-                            <thead className="text-xs text-gray-500 uppercase">
-                                <tr>
-                                    <th className="px-3 py-2">ID</th>
-                                    <th className="px-3 py-2">Cliente</th>
-                                    <th className="px-3 py-2">Estado</th>
-                                    <th className="px-3 py-2">Tiempo</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 text-gray-700">
-                                <tr>
-                                    <td className="px-3 py-2">#1001</td>
-                                    <td className="px-3 py-2">María Pérez</td>
-                                    <td className="px-3 py-2 text-emerald-600">Completado</td>
-                                    <td className="px-3 py-2">10:12</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-3 py-2">#1002</td>
-                                    <td className="px-3 py-2">Jorge López</td>
-                                    <td className="px-3 py-2 text-amber-600">En progreso</td>
-                                    <td className="px-3 py-2">11:05</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-3 py-2">#1003</td>
-                                    <td className="px-3 py-2">Empresa XYZ</td>
-                                    <td className="px-3 py-2 text-red-600">Pendiente</td>
-                                    <td className="px-3 py-2">—</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </main>
+                ) : null}
+            </div>
         </div>
     )
 }

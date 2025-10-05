@@ -23,9 +23,9 @@ function Navbar() {
 
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
-                <a href="#" className="bg-gray-950/50 text-white rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
-                <a href="#" className="text-gray-300 hover:bg-white/5 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Proyectos</a>
-                <a href="#" className="text-gray-300 hover:bg-white/5 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Equipo</a>
+                <a href="#inicio" className="bg-gray-950/50 text-white rounded-md px-3 py-2 text-sm font-medium">Inicio</a>
+                <a href="#estadisticas" className="text-gray-300 hover:bg-white/5 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Estadísticas</a>
+                <a href="#formularios" className="text-gray-300 hover:bg-white/5 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Formularios</a>
               </div>
             </div>
           </div>
