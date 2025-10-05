@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import Statistics from './Statistics.jsx'
-import Formularios from './Formularios.jsx'
 import Forms from './Forms.jsx'
 
 /**
