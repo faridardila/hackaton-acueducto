@@ -34,11 +34,41 @@ function Dashboard() {
     const [helpOpen, setHelpOpen] = useState(false)
         const [route, setRoute] = useState(window.location.hash || '#inicio')
 
+    const [comments, setComments] = useState({})
+    const [commentDraft, setCommentDraft] = useState('')
+    const [commentEditing, setCommentEditing] = useState(false)
+    const [marked, setMarked] = useState({})
+
         useEffect(() => {
             function onHash() { setRoute(window.location.hash || '#inicio') }
             window.addEventListener('hashchange', onHash)
             return () => window.removeEventListener('hashchange', onHash)
         }, [])
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem('house_comments_v1')
+            if (raw) setComments(JSON.parse(raw))
+        } catch (err) {
+        }
+        try {
+            const rawMarks = localStorage.getItem('house_marks_v1')
+            if (rawMarks) setMarked(JSON.parse(rawMarks))
+        } catch (err) {
+            console.warn('Failed to load marks from localStorage', err)
+        }
+    }, [])
+
+    // When a house is selected, populate the draft with the stored comment (if any)
+    useEffect(() => {
+        if (selected) {
+            setCommentDraft(comments[selected.id] || '')
+        } else {
+            setCommentDraft('')
+        }
+        // Close any open editor when selection changes
+        setCommentEditing(false)
+    }, [selected, comments])
 
     const boundary = {
         points: '40,60 960,40 980,160 920,540 120,560 40,420'
@@ -93,6 +123,72 @@ function Dashboard() {
         setSelected(house)
     }
 
+    function saveComment() {
+        if (!selected) return
+        const trimmed = commentDraft.trim()
+        const next = { ...comments }
+        if (trimmed.length > 0) {
+            next[selected.id] = commentDraft
+        } else {
+            delete next[selected.id]
+        }
+        setComments(next)
+        setCommentEditing(false)
+        try {
+            localStorage.setItem('house_comments_v1', JSON.stringify(next))
+        } catch (err) {
+            console.warn('Failed to save comment', err)
+        }
+    }
+
+    // Clear only the draft being edited (doesn't delete saved comment)
+    function clearDraft() {
+        setCommentDraft('')
+    }
+
+    // Delete saved comment for selected house
+    function deleteComment() {
+        if (!selected) return
+        const next = { ...comments }
+        delete next[selected.id]
+        setComments(next)
+        setCommentDraft('')
+        setCommentEditing(false)
+        try {
+            localStorage.setItem('house_comments_v1', JSON.stringify(next))
+        } catch (err) {
+            console.warn('Failed to delete comment', err)
+        }
+    }
+
+    function startCreate() {
+        setCommentDraft('')
+        setCommentEditing(true)
+    }
+
+    function startEdit() {
+        setCommentEditing(true)
+    }
+
+    function cancelEdit() {
+        // revert draft to saved value
+        if (selected) setCommentDraft(comments[selected.id] || '')
+        setCommentEditing(false)
+    }
+
+    function toggleMark() {
+        if (!selected) return
+        const next = { ...marked }
+        if (next[selected.id]) delete next[selected.id]
+        else next[selected.id] = true
+        setMarked(next)
+        try {
+            localStorage.setItem('house_marks_v1', JSON.stringify(next))
+        } catch (err) {
+            console.warn('Failed to save marks', err)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
                     <main className="mx-auto max-w-7xl">
@@ -114,7 +210,75 @@ function Dashboard() {
                                                 <p><strong>Propietario:</strong> {selected.owner}</p>
                                                 <p><strong>Número de familias:</strong> {selected.families}</p>
                                                 <p><strong>ID:</strong> {selected.id}</p>
-                                                <button onClick={() => setSelected(null)} className="mt-2 inline-block px-3 py-1 text-sm bg-indigo-600 text-white rounded">Cerrar</button>
+                                                <div className="space-y-3">
+                                                    {/* Mark checkbox above the comment/editor */}
+                                                    {selected ? (
+                                                        <div className="flex items-center gap-3">
+                                                            <label className="inline-flex items-center cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={!!marked[selected.id]}
+                                                                    onChange={() => toggleMark()}
+                                                                    className="sr-only"
+                                                                />
+                                                                <span className={`w-5 h-5 rounded-sm flex items-center justify-center transition-colors ${marked[selected.id] ? 'bg-red-500 border-red-600' : 'bg-white border border-gray-300'}`}>
+                                                                    {marked[selected.id] ? (
+                                                                        <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8z" clipRule="evenodd" /></svg>
+                                                                    ) : null}
+                                                                </span>
+                                                                <span className="ml-2 text-sm font-medium text-gray-700">{marked[selected.id] ? 'Marcada' : 'Marcar casa'}</span>
+                                                            </label>
+                                                        </div>
+                                                    ) : null}
+                                                    {/* If editing mode is active, show the editor */}
+                                                    {commentEditing ? (
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-600">Comentario</label>
+                                                            <textarea
+                                                                value={commentDraft}
+                                                                onChange={(e) => setCommentDraft(e.target.value)}
+                                                                rows={4}
+                                                                className="w-full rounded border p-2 text-sm"
+                                                            />
+
+                                                            <div className="flex gap-2 mt-2">
+                                                                <button
+                                                                    onClick={saveComment}
+                                                                    disabled={commentDraft.trim().length === 0}
+                                                                    className={`inline-block px-3 py-1 text-sm rounded ${commentDraft.trim().length === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 text-white'}`}
+                                                                >
+                                                                    Guardar
+                                                                </button>
+
+                                                                <button onClick={clearDraft} className="inline-block px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded">Limpiar</button>
+                                                                <button onClick={cancelEdit} className="inline-block px-3 py-1 text-sm bg-yellow-500 text-white rounded">Cancelar</button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            {/* Not editing: show saved comment if exists, and action buttons */}
+                                                            {comments[selected.id] ? (
+                                                                <div className="space-y-2">
+                                                                    <div className="text-sm text-gray-700">{comments[selected.id]}</div>
+                                                                    <div className="flex gap-2">
+                                                                        <button onClick={startEdit} className="inline-block px-3 py-1 text-sm bg-indigo-600 text-white rounded">Editar comentario</button>
+                                                                        <button onClick={deleteComment} className="inline-block px-3 py-1 text-sm bg-red-600 text-white rounded">Eliminar comentario</button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex gap-2">
+                                                                    <button onClick={startCreate} className="inline-block px-3 py-1 text-sm bg-emerald-600 text-white rounded">Crear comentario</button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {/* Close button below the comment options; hidden while editing */}
+                                                {!commentEditing ? (
+                                                    <div className="mt-3">
+                                                        <button onClick={() => setSelected(null)} className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded">Cerrar</button>
+                                                    </div>
+                                                ) : null}
                                             </div>
                                         )}
                                     </aside>
@@ -137,6 +301,13 @@ function Dashboard() {
                                                             onMouseLeave={handleMouseLeave}
                                                             onClick={() => handleClick(h)}
                                                         />
+                                                        {/** Render red marker circle at the first point corner if marked */}
+                                                        {marked[h.id] ? (() => {
+                                                            const first = h.points.split(' ')[0]
+                                                            const [cx, cy] = first.split(',').map(Number)
+                                                            const rx = Math.max(6, 0)
+                                                            return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
+                                                        })() : null}
                                                     </g>
                                                 )
                                             })}
