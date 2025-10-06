@@ -52,6 +52,7 @@ function Dashboard() {
             const raw = localStorage.getItem('house_comments_v1')
             if (raw) setComments(JSON.parse(raw))
         } catch (err) {
+            console.warn('Failed to load comments from localStorage', err)
         }
         try {
             const rawMarks = localStorage.getItem('house_marks_v1')
@@ -301,28 +302,30 @@ function Dashboard() {
                                             <rect x="0" y="0" width="1000" height="600" fill="#f8fafc" />
                                             <polygon points={currentNeighborhood.boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
 
-                                                                        {currentNeighborhood.houses.map((h) => {
-                                                                            const isHovered = hovered?.id === h.id
-                                                                            const isSelected = selected?.id === h.id
-                                                                            return (
-                                                                                <g key={h.id}>
-                                                                                    <polygon
-                                                                                        points={h.points}
-                                                                                        className={`cursor-pointer transition-all ${isSelected ? 'fill-emerald-400 stroke-emerald-700 stroke-2' : isHovered ? 'fill-emerald-300 stroke-emerald-600 stroke-1' : 'fill-white stroke-rose-300 stroke-1'}`}
-                                                                                        onMouseMove={(e) => handleMouseMove(e, h)}
-                                                                                        onMouseEnter={(e) => handleMouseMove(e, h)}
-                                                                                        onMouseLeave={handleMouseLeave}
-                                                                                        onClick={() => handleClick(h)}
-                                                                                    />
-                                                                                    {/** Render red marker circle at the first point corner if marked */}
-                                                                                    {marked[h.id] ? (() => {
-                                                                                        const first = h.points.split(' ')[0]
-                                                                                        const [cx, cy] = first.split(',').map(Number)
-                                                                                        return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
-                                                                                    })() : null}
-                                                                                </g>
-                                                                            )
-                                                                        })}
+                                            {houses.map((h) => {
+                                                const isHovered = hovered?.id === h.id
+                                                const isSelected = selected?.id === h.id
+                                                return (
+                                                    <g key={h.id}>
+                                                        <polygon
+                                                            points={h.points}
+                                                            className={`cursor-pointer transition-all ${isSelected ? 'fill-emerald-400 stroke-emerald-700 stroke-2' : isHovered ? 'fill-emerald-300 stroke-emerald-600 stroke-1' : 'fill-white stroke-rose-300 stroke-1'}`}
+                                                            onMouseMove={(e) => handleMouseMove(e, h)}
+                                                            onMouseEnter={(e) => handleMouseMove(e, h)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                            onClick={() => handleClick(h)}
+                                                        />
+                                                        {/** Render red marker circle at the first point corner if marked */}
+                                                        {marked[h.id] ? (() => {
+                                                            const first = h.points.split(' ')[0]
+                                                            const [cx, cy] = first.split(',').map(Number)
+                                                            // eslint-disable-next-line no-unused-vars
+                                                            const rx = Math.max(6, 0)
+                                                            return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
+                                                        })() : null}
+                                                    </g>
+                                                )
+                                            })}
                                         </svg>
 
                                         {hovered ? (
@@ -353,7 +356,7 @@ function Dashboard() {
                 <button
                     onClick={() => setHelpOpen(true)}
                     aria-label="Ayuda"
-                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
                 >
                     <span className="text-lg font-bold">?</span>
                 </button>
