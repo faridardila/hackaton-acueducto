@@ -49,6 +49,7 @@ function Dashboard() {
             const raw = localStorage.getItem('house_comments_v1')
             if (raw) setComments(JSON.parse(raw))
         } catch (err) {
+            console.warn('Failed to load comments from localStorage', err)
         }
         try {
             const rawMarks = localStorage.getItem('house_marks_v1')
@@ -304,6 +305,7 @@ function Dashboard() {
                                                         {marked[h.id] ? (() => {
                                                             const first = h.points.split(' ')[0]
                                                             const [cx, cy] = first.split(',').map(Number)
+                                                            // eslint-disable-next-line no-unused-vars
                                                             const rx = Math.max(6, 0)
                                                             return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
                                                         })() : null}
@@ -340,7 +342,7 @@ function Dashboard() {
                 <button
                     onClick={() => setHelpOpen(true)}
                     aria-label="Ayuda"
-                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
                 >
                     <span className="text-lg font-bold">?</span>
                 </button>
