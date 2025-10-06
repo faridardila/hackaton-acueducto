@@ -49,6 +49,7 @@ function Dashboard() {
             const raw = localStorage.getItem('house_comments_v1')
             if (raw) setComments(JSON.parse(raw))
         } catch (err) {
+            console.warn('Failed to load comments from localStorage', err)
         }
         try {
             const rawMarks = localStorage.getItem('house_marks_v1')
@@ -304,8 +305,8 @@ function Dashboard() {
                                                         {marked[h.id] ? (() => {
                                                             const first = h.points.split(' ')[0]
                                                             const [cx, cy] = first.split(',').map(Number)
-                                                            const rx = Math.max(6, 0)
-                                                            return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
+                                                            const r = Math.max(6, 0)
+                                                            return <circle cx={cx + 6} cy={cy + 6} r={r} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
                                                         })() : null}
                                                     </g>
                                                 )
