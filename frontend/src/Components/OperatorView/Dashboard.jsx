@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import Statistics from './Statistics.jsx'
 import Forms from './Forms.jsx'
-import neighborhoods from '../../data/neighborhoods'
 
 /**
  * Tarjeta de estadística
@@ -38,8 +37,6 @@ function Dashboard() {
     const [commentDraft, setCommentDraft] = useState('')
     const [commentEditing, setCommentEditing] = useState(false)
     const [marked, setMarked] = useState({})
-    const [neighborhoodMenuOpen, setNeighborhoodMenuOpen] = useState(false)
-    const neighborhoodMenuRef = useRef(null)
 
         useEffect(() => {
             function onHash() { setRoute(window.location.hash || '#inicio') }
@@ -52,7 +49,6 @@ function Dashboard() {
             const raw = localStorage.getItem('house_comments_v1')
             if (raw) setComments(JSON.parse(raw))
         } catch (err) {
-            console.warn('Failed to load comments from localStorage', err)
         }
         try {
             const rawMarks = localStorage.getItem('house_marks_v1')
@@ -60,16 +56,6 @@ function Dashboard() {
         } catch (err) {
             console.warn('Failed to load marks from localStorage', err)
         }
-    }, [])
-
-    // Close neighborhood popup on outside click
-    useEffect(() => {
-        function onDocClick(e) {
-            if (!neighborhoodMenuRef.current) return
-            if (!neighborhoodMenuRef.current.contains(e.target)) setNeighborhoodMenuOpen(false)
-        }
-        document.addEventListener('click', onDocClick)
-        return () => document.removeEventListener('click', onDocClick)
     }, [])
 
     // When a house is selected, populate the draft with the stored comment (if any)
@@ -83,9 +69,40 @@ function Dashboard() {
         setCommentEditing(false)
     }, [selected, comments])
 
-    // neighborhoods are imported from shared data to keep the Dashboard and Statistics in sync
-    const [selectedNeighborhoodId, setSelectedNeighborhoodId] = useState('san_miguel')
-    const currentNeighborhood = neighborhoods.find(n => n.id === selectedNeighborhoodId) || neighborhoods[0]
+    const boundary = {
+        points: '40,60 960,40 980,160 920,540 120,560 40,420'
+    }
+
+    const houses = [
+        { id: 1, address: 'Calle 1 #10-01', owner: 'Luis Gómez', families: 3, points: '120,100 185,100 170,170 115,170' },
+        { id: 2, address: 'Calle 2 #11-02', owner: 'María López', families: 4, points: '200,100 265,100 250,170 195,170' },
+        { id: 3, address: 'Calle 3 #12-03', owner: 'Ana Ruiz', families: 2, points: '280,100 345,100 330,170 275,170' },
+        { id: 4, address: 'Calle 4 #13-04', owner: 'Pedro Díaz', families: 5, points: '360,100 425,100 410,170 355,170' },
+        { id: 5, address: 'Calle 5 #14-05', owner: 'Sandra Villa', families: 1, points: '440,100 505,100 490,170 435,170' },
+        { id: 6, address: 'Calle 6 #15-06', owner: 'Jorge Salas', families: 6, points: '520,100 585,100 570,170 515,170' },
+
+        { id: 7, address: 'Calle 7 #16-07', owner: 'Elena Mora', families: 2, points: '120,180 185,180 170,250 115,250' },
+        { id: 8, address: 'Calle 8 #17-08', owner: 'Carlos Peña', families: 3, points: '200,180 265,180 250,250 195,250' },
+        { id: 9, address: 'Calle 9 #18-09', owner: 'Lucía Castro', families: 4, points: '280,180 345,180 330,250 275,250' },
+        { id: 10, address: 'Calle 10 #19-10', owner: 'Raúl Herrera', families: 2, points: '360,180 425,180 410,250 355,250' },
+        { id: 11, address: 'Calle 11 #20-11', owner: 'Marta Ruiz', families: 3, points: '440,180 505,180 490,250 435,250' },
+        { id: 12, address: 'Calle 12 #21-12', owner: 'Diego Prada', families: 5, points: '520,180 585,180 570,250 515,250' },
+
+        { id: 13, address: 'Calle 13 #22-13', owner: 'Nadia Ortiz', families: 1, points: '120,260 185,260 170,330 115,330' },
+        { id: 14, address: 'Calle 14 #23-14', owner: 'Iván Ríos', families: 2, points: '200,260 265,260 250,330 195,330' },
+        { id: 15, address: 'Calle 15 #24-15', owner: 'Paula León', families: 4, points: '280,260 345,260 330,330 275,330' },
+        { id: 16, address: 'Calle 16 #25-16', owner: 'Óscar P.', families: 3, points: '360,260 425,260 410,330 355,330' },
+        { id: 17, address: 'Calle 17 #26-17', owner: 'Lina M.', families: 2, points: '440,260 505,260 490,330 435,330' },
+        { id: 18, address: 'Calle 18 #27-18', owner: 'Roberto S.', families: 4, points: '520,260 585,260 570,330 515,330' },
+
+        { id: 19, address: 'Calle 19 #28-19', owner: 'Diana V.', families: 2, points: '120,340 185,340 170,410 115,410' },
+        { id: 20, address: 'Calle 20 #29-20', owner: 'Mauricio Q.', families: 3, points: '200,340 265,340 250,410 195,410' },
+        { id: 21, address: 'Calle 21 #30-21', owner: 'Sofía R.', families: 2, points: '280,340 345,340 330,410 275,410' },
+        { id: 22, address: 'Calle 22 #31-22', owner: 'Héctor U.', families: 1, points: '360,340 425,340 410,410 355,410' },
+
+        { id: 23, address: 'Calle 23 #32-23', owner: 'Ivette Z.', families: 2, points: '710,400 805,400 780,510 680,510' },
+        { id: 24, address: 'Calle 24 #33-24', owner: 'Camilo T.', families: 3, points: '830,400 920,400 900,500 800,510' },
+    ]
 
     // Handlers
     function handleMouseMove(e, house) {
@@ -173,39 +190,7 @@ function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
-                            <main className="mx-auto max-w-7xl">
-                                        { (route === '#inicio' || route === '') && (
-                                            /* Neighborhood selector centered: single-line bar with down arrow and centered name */
-                                            <div className="mb-3 flex justify-center">
-                                                <div className="relative" ref={neighborhoodMenuRef}>
-                                                    <button
-                                                        onClick={() => setNeighborhoodMenuOpen((s) => !s)}
-                                                        className="w-72 px-4 py-2 bg-white border border-gray-300 rounded-md flex items-center justify-center text-sm shadow-sm"
-                                                        aria-expanded={neighborhoodMenuOpen}
-                                                    >
-                                                        <span className="absolute left-4 text-sm text-gray-600">Barrio</span>
-                                                        <span className="mx-auto font-medium text-gray-800">{currentNeighborhood.name}</span>
-                                                        <svg className="absolute right-3 w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
-
-                                                    {neighborhoodMenuOpen ? (
-                                                        <div className="absolute z-40 mt-2 w-72 bg-white border rounded-md shadow-lg">
-                                                            {neighborhoods.map(n => (
-                                                                <div
-                                                                    key={n.id}
-                                                                    onClick={() => { setSelectedNeighborhoodId(n.id); setSelected(null); setNeighborhoodMenuOpen(false); }}
-                                                                    className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                                                >
-                                                                    {n.name}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    ) : null}
-                                                </div>
-                                            </div>
-                                        ) }
+                    <main className="mx-auto max-w-7xl">
                                 {route === '#estadisticas' ? (
                                     <Statistics />
                                         ) : route === '#formularios' ? (
@@ -300,7 +285,7 @@ function Dashboard() {
                                     <div ref={mapRef} className="relative flex-1 rounded border overflow-hidden bg-white" style={{ minHeight: 520 }}>
                                         <svg viewBox="0 0 1000 600" className="w-full h-full block">
                                             <rect x="0" y="0" width="1000" height="600" fill="#f8fafc" />
-                                            <polygon points={currentNeighborhood.boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
+                                            <polygon points={boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
 
                                             {houses.map((h) => {
                                                 const isHovered = hovered?.id === h.id
@@ -319,7 +304,6 @@ function Dashboard() {
                                                         {marked[h.id] ? (() => {
                                                             const first = h.points.split(' ')[0]
                                                             const [cx, cy] = first.split(',').map(Number)
-                                                            // eslint-disable-next-line no-unused-vars
                                                             const rx = Math.max(6, 0)
                                                             return <circle cx={cx + 6} cy={cy + 6} r={6} fill="#dc2626" stroke="#991b1b" strokeWidth={1} />
                                                         })() : null}
@@ -356,7 +340,7 @@ function Dashboard() {
                 <button
                     onClick={() => setHelpOpen(true)}
                     aria-label="Ayuda"
-                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
                 >
                     <span className="text-lg font-bold">?</span>
                 </button>
