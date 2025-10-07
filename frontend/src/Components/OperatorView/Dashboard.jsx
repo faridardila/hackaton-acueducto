@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react'
 import { BellIcon, ChartBarIcon, UserGroupIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import neighborhoods from '../../data/neighborhoods'
 import Statistics from './Statistics.jsx'
 import Forms from './Forms.jsx'
 
@@ -27,6 +28,7 @@ function StatCard(props) {
 
 function Dashboard() {
     const mapRef = useRef(null)
+    const [selectedNeighborhood, setSelectedNeighborhood] = useState('san_miguel')
     const [hovered, setHovered] = useState(null)
     const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
     const [selected, setSelected] = useState(null)
@@ -192,6 +194,13 @@ function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
                     <main className="mx-auto max-w-7xl">
+                        <div className="p-6 bg-white rounded shadow-sm border">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 className="text-xl font-semibold">Panel Operativo</h2>
+                                    <p className="text-sm text-gray-600 mt-1">Mapa interactivo y panel de detalles de predios</p>
+                                </div>
+                            </div>
                                 {route === '#estadisticas' ? (
                                     <Statistics />
                                         ) : route === '#formularios' ? (
@@ -199,6 +208,20 @@ function Dashboard() {
                                 ) : (
                             // default: interactive map
                             <section className="mt-6 rounded-lg bg-white p-4 shadow-sm border">
+                                {/* Neighborhood selector (centered dropdown) */}
+                                <div className="mb-3 flex justify-center">
+                                    <div className="w-full max-w-md">
+                                        <label className="sr-only">Seleccionar barrio</label>
+                                        <div className="relative">
+                                            <select value={selectedNeighborhood} onChange={(e) => setSelectedNeighborhood(e.target.value)} className="block w-full p-2 border rounded text-sm">
+                                                {neighborhoods.map(n => (
+                                                    <option key={n.id} value={n.id}>{n.name}</option>
+                                                ))}
+                                            </select>
+                                            {/* arrow removed per request */}
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex gap-6">
                                     <aside className="w-80 rounded border p-4 bg-gray-50 shadow-sm">
                                         <h3 className="text-sm font-semibold">Panel de detalles</h3>
@@ -260,14 +283,28 @@ function Dashboard() {
                                                             {comments[selected.id] ? (
                                                                 <div className="space-y-2">
                                                                     <div className="text-sm text-gray-700">{comments[selected.id]}</div>
-                                                                    <div className="flex gap-2">
-                                                                        <button onClick={startEdit} className="inline-block px-3 py-1 text-sm bg-indigo-600 text-white rounded">Editar comentario</button>
-                                                                        <button onClick={deleteComment} className="inline-block px-3 py-1 text-sm bg-red-600 text-white rounded">Eliminar comentario</button>
+                                                                    <div className="flex items-center gap-3">
+                                                                        {/* Primary-looking pill (keeps label, styled like the green preview pill) */}
+                                                                        <button onClick={() => {}} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                                            {/* eye icon */}
+                                                                            <svg className="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 5C7 5 3.3 8.1 2 12c1.3 3.9 5 7 10 7s8.7-3.1 10-7c-1.3-3.9-5-7-10-7z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                            <span>Vista previa</span>
+                                                                        </button>
+
+                                                                        {/* small blue square edit */}
+                                                                        <button onClick={startEdit} title="Editar comentario" className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
+                                                                            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 13.5V16h2.5L15.8 6.7l-2.5-2.5L4 13.5z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                        </button>
+
+                                                                        {/* small red square delete */}
+                                                                        <button onClick={deleteComment} title="Eliminar comentario" className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-red-50 text-red-600 border border-red-100 shadow-sm">
+                                                                            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 7h8M8 7v8m4-8v8M7 7l1-3h4l1 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             ) : (
                                                                 <div className="flex gap-2">
-                                                                    <button onClick={startCreate} className="inline-block px-3 py-1 text-sm bg-emerald-600 text-white rounded">Crear comentario</button>
+                                                                    <button onClick={startCreate} className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">Crear comentario</button>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -288,7 +325,12 @@ function Dashboard() {
                                             <rect x="0" y="0" width="1000" height="600" fill="#f8fafc" />
                                             <polygon points={boundary.points} fill="#16a34a" fillOpacity={0.08} stroke="#16a34a" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity="0.95" />
 
-                                            {houses.map((h) => {
+                                            {/* Filter houses by selected neighborhood if provided */}
+                                            {(
+                                                selectedNeighborhood ? (
+                                                    (neighborhoods.find(n => n.id === selectedNeighborhood)?.houses || [])
+                                                ) : houses
+                                            ).map((h) => {
                                                 const isHovered = hovered?.id === h.id
                                                 const isSelected = selected?.id === h.id
                                                 return (
@@ -334,14 +376,15 @@ function Dashboard() {
                                 </div>
                             </section>
                         )}
-                    </main>
+                </div>
+            </main>
 
-            {/* Floating help button (bottom-left) and manual popup */}
+        {/* Floating help button (bottom-left) and manual popup */}
             <div>
                 <button
                     onClick={() => setHelpOpen(true)}
                     aria-label="Ayuda"
-                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+                    className="fixed left-4 bottom-6 z-50 h-12 w-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700"
                 >
                     <span className="text-lg font-bold">?</span>
                 </button>

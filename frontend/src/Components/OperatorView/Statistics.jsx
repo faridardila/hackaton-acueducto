@@ -230,17 +230,24 @@ export default function Statistics() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <main className="mx-auto max-w-7xl">
+        <div className="p-6 bg-white rounded shadow-sm border">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold">Estadísticas</h2>
+              <p className="text-sm text-gray-600 mt-1">Visión general y análisis por barrio y por predio</p>
+            </div>
+          </div>
         {/* Tabs */}
         <div className="mb-4 flex items-center gap-4">
           <button
             onClick={() => setTab('predios')}
-            className={`px-3 py-1 rounded ${tab === 'predios' ? 'bg-indigo-600 text-white' : 'bg-white border'}`}
+            className={`px-3 py-1 rounded-lg ${tab === 'predios' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
           >
             Estadísticas - Predios
           </button>
           <button
             onClick={() => setTab('formularios')}
-            className={`px-3 py-1 rounded ${tab === 'formularios' ? 'bg-indigo-600 text-white' : 'bg-white border'}`}
+            className={`px-3 py-1 rounded-lg ${tab === 'formularios' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
           >
             Estadísticas - Formularios
           </button>
@@ -508,6 +515,7 @@ export default function Statistics() {
             </div>
           </section>
         )}
+          </div>
       </main>
     </div>
   )
