@@ -1,14 +1,7 @@
-import Navbar from './Components/OperatorView/Navbar.jsx';
-import Dashboard from './Components/OperatorView/Dashboard.jsx';
+import { MobileHome } from './Components/CommonUserView'
 
 function App() {
-
-  return (
-    <>
-    <Navbar />
-    <Dashboard />
-    </>
-  )
+  return <MobileHome />
 }
 
 export default App
