@@ -1,12 +1,15 @@
-import Navbar from './Components/OperatorView/Navbar.jsx';
-import Dashboard from './Components/OperatorView/Dashboard.jsx';
+import React, { useState } from 'react'
+import { MobileHome } from './Components/CommonUserView'
+import Dashboard from './Components/OperatorView/Dashboard'
 
 function App() {
-
+  const [view, setView] = useState('common') 
   return (
     <>
-    <Navbar />
-    <Dashboard />
+      <button onClick={() => setView('common')}>Usuario</button>
+      <button onClick={() => setView('operator')}>Operador</button>
+
+      {view === 'common' ? <MobileHome /> : <Dashboard />}
     </>
   )
 }
